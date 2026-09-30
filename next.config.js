@@ -1,0 +1,42 @@
+import { withPayload } from '@payloadcms/next/withPayload'
+
+import redirects from './redirects.js'
+
+const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : undefined || process.env.__NEXT_PRIVATE_ORIGIN || 'https://www.thedentistltd.co.ke'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    unoptimized: true, // This disables Vercel Image Optimization
+    remotePatterns: [
+      ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
+        const url = new URL(item)
+
+        return {
+          hostname: url.hostname,
+          protocol: url.protocol.replace(':', ''),
+        }
+      }),
+
+      {
+        protocol: 'https',
+        hostname: 'pub-f4fdcc1c9f94456da122f35cbc892701.r2.dev',
+      },
+    ],
+  },
+  webpack: (webpackConfig) => {
+    webpackConfig.resolve.extensionAlias = {
+      '.cjs': ['.cts', '.cjs'],
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.mjs': ['.mts', '.mjs'],
+    }
+
+    return webpackConfig
+  },
+  reactStrictMode: true,
+  redirects,
+}
+
+export default withPayload(nextConfig, { devBundleServerPackages: false })
